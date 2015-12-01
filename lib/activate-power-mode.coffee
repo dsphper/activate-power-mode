@@ -5,9 +5,7 @@ module.exports = ActivatePowerMode =
   activatePowerModeView: null
   modalPanel: null
   subscriptions: null
-  shakeFlagList: {}
   runFlag: true
-    # config
   config:
     shakeswitch:
       title: 'Set Shake Switch'
@@ -25,7 +23,6 @@ module.exports = ActivatePowerMode =
 
     @throttledShake = throttle @shake.bind(this), 100, trailing: false
     @throttledSpawnParticles = throttle @spawnParticles.bind(this), 25, trailing: false
-    # @editorSwitch()
   editorSwitch: ->
     @editor = atom.workspace.getActiveTextEditor()
     console.log(@editor)
@@ -50,7 +47,6 @@ module.exports = ActivatePowerMode =
     left: scrollViewRect.left - editorRect.left
 
   onChange: (e) ->
-    console.log(@canvas.style.display)
     # Page switching effect disappears
     if @canvas.style.display == 'none'
       @canvas.style.display = "block"
@@ -65,8 +61,6 @@ module.exports = ActivatePowerMode =
     @throttledShake()
 
   shake: ->
-    # 去除震动效果
-    console.log(@config.shakeswitch)
     if atom.config.get('activate-power-mode.shakeswitch')
       intensity = 1 + 2 * Math.random()
       x = intensity * (if Math.random() > 0.5 then -1 else 1)
