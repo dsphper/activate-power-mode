@@ -4,10 +4,6 @@
     {
       'label': 'Toggle activate-power-mode'
       'command': 'activate-power-mode:toggle'
-    },
-    {
-      'label': 'shake activate-power-mode'
-      'command': 'activate-power-mode:shakeSwitch'
     }
   ]
 'menu': [
