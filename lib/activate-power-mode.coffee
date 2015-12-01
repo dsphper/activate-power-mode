@@ -5,6 +5,17 @@ module.exports = ActivatePowerMode =
   activatePowerModeView: null
   modalPanel: null
   subscriptions: null
+  shakeFlagList: {}
+  runFlag: true
+    # config
+  config:
+    shakeswitch:
+      title: 'Set Shake Switch'
+      description: 'Set the default state for shake'
+      type: 'boolean'
+      default: false
+      order: 0
+
 
   activate: (state) ->
     @subscriptions = new CompositeDisposable
@@ -14,14 +25,15 @@ module.exports = ActivatePowerMode =
 
     @throttledShake = throttle @shake.bind(this), 100, trailing: false
     @throttledSpawnParticles = throttle @spawnParticles.bind(this), 25, trailing: false
-
+    # @editorSwitch()
+  editorSwitch: ->
     @editor = atom.workspace.getActiveTextEditor()
+    console.log(@editor)
     @editorElement = atom.views.getView @editor
     @editorElement.classList.add "power-mode"
 
     @subscriptions.add @editor.getBuffer().onDidChange(@onChange.bind(this))
     @setupCanvas()
-
   setupCanvas: ->
     @canvas = document.createElement "canvas"
     @context = @canvas.getContext "2d"
@@ -38,6 +50,10 @@ module.exports = ActivatePowerMode =
     left: scrollViewRect.left - editorRect.left
 
   onChange: (e) ->
+    console.log(@canvas.style.display)
+    # Page switching effect disappears
+    if @canvas.style.display == 'none'
+      @canvas.style.display = "block"
     spawnParticles = true
     if e.newText
       spawnParticles = e.newText isnt "\n"
@@ -49,17 +65,20 @@ module.exports = ActivatePowerMode =
     @throttledShake()
 
   shake: ->
-    intensity = 1 + 2 * Math.random()
-    x = intensity * (if Math.random() > 0.5 then -1 else 1)
-    y = intensity * (if Math.random() > 0.5 then -1 else 1)
+    # 去除震动效果
+    console.log(@config.shakeswitch)
+    if atom.config.get('activate-power-mode.shakeswitch')
+      intensity = 1 + 2 * Math.random()
+      x = intensity * (if Math.random() > 0.5 then -1 else 1)
+      y = intensity * (if Math.random() > 0.5 then -1 else 1)
+      console.log(intensity)
+      @editorElement.style.top = "#{y}px"
+      @editorElement.style.left = "#{x}px"
 
-    @editorElement.style.top = "#{y}px"
-    @editorElement.style.left = "#{x}px"
-
-    setTimeout =>
-      @editorElement.style.top = ""
-      @editorElement.style.left = ""
-    , 75
+      setTimeout =>
+        @editorElement.style.top = ""
+        @editorElement.style.left = ""
+      , 75
 
   spawnParticles: (range) ->
     cursorOffset = @calculateCursorOffset()
@@ -78,8 +97,8 @@ module.exports = ActivatePowerMode =
   getColorAtPosition: (left, top) ->
     offset = @editorElement.getBoundingClientRect()
     el = atom.views.getView(@editor).shadowRoot.elementFromPoint(
-      left + offset.left
-      top + offset.top
+      left + offset.left - 5
+      top + offset.top - 5
     )
 
     if el
@@ -119,4 +138,8 @@ module.exports = ActivatePowerMode =
     console.log 'ActivatePowerMode was toggled!'
     @particlePointer = 0
     @particles = []
-    requestAnimationFrame @drawParticles.bind(this)
+    console.log(this)
+    if @runFlag
+      requestAnimationFrame @drawParticles.bind(this)
+    @runFlag = false
+    @editorSwitch()

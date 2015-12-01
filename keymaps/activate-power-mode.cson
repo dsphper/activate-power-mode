@@ -9,3 +9,4 @@
 # https://atom.io/docs/latest/behind-atom-keymaps-in-depth
 'atom-workspace':
   'ctrl-alt-o': 'activate-power-mode:toggle'
+  'ctrl-alt-j': 'activate-power-mode:shakeSwitch'
